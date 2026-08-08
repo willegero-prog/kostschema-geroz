@@ -1,0 +1,17 @@
+{
+  "name": "kostschema-geroz",
+  "install": "python3 --version",
+  "terminals": [
+    {
+      "name": "web-server",
+      "command": "python3 server.py",
+      "description": "Serves the meal-plan generator static site at http://localhost:8000"
+    }
+  ],
+  "ports": [
+    {
+      "name": "web server",
+      "port": 8000
+    }
+  ]
+}

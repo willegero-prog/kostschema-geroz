@@ -334,21 +334,21 @@ body::before {
 }
 
 .title {
-    font-size: 2.5rem;
-    font-weight: 600;
+    font-size: 3rem; /* 48px on desktop */
+    font-weight: 800;
     text-align: center;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
+    letter-spacing: -1px;
 }
 
 .subtitle {
     text-align: center;
     color: var(--text-secondary);
     margin-bottom: 40px;
-    font-size: 1.1rem;
+    font-size: 1.375rem; /* 22px */
+    font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
 /* Step Indicator */

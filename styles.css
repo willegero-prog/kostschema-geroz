@@ -7,6 +7,15 @@
 html {
     overflow-x: hidden;
     overflow-y: auto;
+    /* Prevent mobile browsers from auto-inflating text on orientation change */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Normalize buttons so iOS Safari doesn't apply its default control styling */
+button {
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 :root {
@@ -24,14 +33,18 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     background: #000000;
     min-height: 100vh;
+    /* Dynamic viewport height avoids iOS Safari address-bar jump */
+    min-height: 100dvh;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    /* Respect device safe areas (notch / rounded corners) on iOS and Android */
+    padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
     color: var(--text-primary);
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body::before {
@@ -57,8 +70,8 @@ body::before {
 /* Hamburger Menu */
 .hamburger-menu {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: max(20px, env(safe-area-inset-top));
+    left: max(20px, env(safe-area-inset-left));
     z-index: 1000;
 }
 
@@ -1415,6 +1428,11 @@ body::before {
         flex: 0 0 calc(33.333% - 10px);
     }
 
+    /* The single connector line misaligns once steps wrap onto multiple rows */
+    .step-indicator::before {
+        display: none;
+    }
+
     .footer-content {
         padding: 20px;
     }
@@ -1449,8 +1467,8 @@ body::before {
     }
 
     .hamburger-menu {
-        top: 15px;
-        left: 15px;
+        top: max(15px, env(safe-area-inset-top));
+        left: max(15px, env(safe-area-inset-left));
     }
 
     .info-modal-content {
@@ -1462,6 +1480,88 @@ body::before {
         padding: 15px 30px;
         font-size: 1rem;
         min-width: 200px;
+    }
+}
+
+/* Small phones (Android / iOS) */
+@media (max-width: 480px) {
+    body {
+        padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+
+    .container {
+        margin: 10px auto;
+    }
+
+    .glass-panel {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .title {
+        font-size: 1.6rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: 26px;
+    }
+
+    .step-content h2 {
+        font-size: 1.35rem;
+        margin-bottom: 22px;
+    }
+
+    .step-indicator {
+        gap: 8px;
+        margin-bottom: 26px;
+    }
+
+    .step {
+        flex: 0 0 calc(33.333% - 8px);
+    }
+
+    .step-number {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+
+    .step-label {
+        font-size: 0.68rem;
+    }
+
+    .goal-btn {
+        padding: 22px 16px;
+    }
+
+    .day-selector {
+        gap: 8px;
+    }
+
+    .day-btn {
+        padding: 12px 4px;
+        font-size: 0.85rem;
+    }
+
+    .navigation {
+        gap: 10px;
+    }
+
+    .nav-btn {
+        padding: 14px 12px;
+    }
+
+    .macros-grid {
+        gap: 6px;
+    }
+
+    .info-modal-content {
+        padding: 22px;
+    }
+
+    .info-modal-content h3 {
+        font-size: 1.4rem;
     }
 }
 

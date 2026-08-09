@@ -2,6 +2,7 @@
 const state = {
     currentStep: 1,
     goal: null,
+    gender: null,
     age: null,
     height: null,
     weight: null,
@@ -25,14 +26,14 @@ const macroDistributions = {
 };
 
 // BMR and TDEE calculation functions
-function calculateBMR(age, height, weight) {
+function calculateBMR(age, height, weight, gender) {
     // Mifflin-St Jeor Equation (most accurate)
-    // BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) + 5 (for males)
-    // For simplicity, we'll use a unisex formula that averages male/female
-    // Male: BMR = 10 × weight + 6.25 × height - 5 × age + 5
-    // Female: BMR = 10 × weight + 6.25 × height - 5 × age - 161
-    // Using average: BMR = 10 × weight + 6.25 × height - 5 × age - 78
-    const bmr = (10 * weight) + (6.25 * height) - (5 * age) - 78;
+    // The gender-specific constant makes the estimate more accurate, since males
+    // and females have different average body composition and energy expenditure.
+    // Male:   BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) + 5
+    // Female: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age(years) - 161
+    const genderConstant = gender === 'female' ? -161 : 5;
+    const bmr = (10 * weight) + (6.25 * height) - (5 * age) + genderConstant;
     return Math.round(bmr);
 }
 
@@ -111,8 +112,8 @@ function setupBMRAutoCalculation() {
         const height = parseFloat(heightInput.value);
         const weight = parseFloat(weightInput.value);
         
-        if (age && height && weight && age > 0 && height > 0 && weight > 0) {
-            const bmr = calculateBMR(age, height, weight);
+        if (state.gender && age && height && weight && age > 0 && height > 0 && weight > 0) {
+            const bmr = calculateBMR(age, height, weight, state.gender);
             const tdee = calculateTDEE(bmr, 'moderate');
             
             bmrInput.value = bmr;
@@ -132,6 +133,16 @@ function setupBMRAutoCalculation() {
     ageInput.addEventListener('input', updateBMRAndTDEE);
     heightInput.addEventListener('input', updateBMRAndTDEE);
     weightInput.addEventListener('input', updateBMRAndTDEE);
+
+    // Gender selection: update state and recalculate BMR/TDEE automatically
+    document.querySelectorAll('.gender-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
+            e.currentTarget.classList.add('selected');
+            state.gender = e.currentTarget.dataset.gender;
+            updateBMRAndTDEE();
+        });
+    });
 }
 
 function initializeEventListeners() {
@@ -172,8 +183,14 @@ function initializeEventListeners() {
     });
 
     // Navigation buttons
-    document.getElementById('next-btn').addEventListener('click', nextStep);
-    document.getElementById('prev-btn').addEventListener('click', prevStep);
+    // Every step renders its own Nästa/Föregående buttons that share the same
+    // id, so bind by class to all of them instead of only the first id match.
+    document.querySelectorAll('.navigation .nav-btn.primary').forEach(btn => {
+        btn.addEventListener('click', nextStep);
+    });
+    document.querySelectorAll('.navigation .nav-btn:not(.primary)').forEach(btn => {
+        btn.addEventListener('click', prevStep);
+    });
 
     // PDF download
     document.getElementById('download-pdf').addEventListener('click', downloadPDF);
@@ -252,6 +269,10 @@ function validateCurrentStep() {
             }
             break;
         case 2:
+            if (!state.gender) {
+                alert('Vänligen välj kön (Man eller Kvinna)');
+                return false;
+            }
             state.age = parseInt(document.getElementById('age').value);
             state.height = parseFloat(document.getElementById('height').value);
             state.weight = parseFloat(document.getElementById('weight').value);
@@ -318,9 +339,15 @@ function updateStepDisplay() {
         }
     });
 
-    // Update navigation buttons
-    document.getElementById('prev-btn').style.display = state.currentStep > 1 ? 'block' : 'none';
-    document.getElementById('next-btn').style.display = state.currentStep < 6 ? 'block' : 'none';
+    // Update navigation buttons for the currently visible step. Buttons share
+    // ids across steps, so scope the lookup to the active step's content.
+    const activeContent = document.querySelector('.step-content.active');
+    if (activeContent) {
+        const prevBtn = activeContent.querySelector('.nav-btn:not(.primary)');
+        const nextBtn = activeContent.querySelector('.nav-btn.primary');
+        if (prevBtn) prevBtn.style.display = state.currentStep > 1 ? 'block' : 'none';
+        if (nextBtn) nextBtn.style.display = state.currentStep < 6 ? 'block' : 'none';
+    }
 }
 
 // Day name translations
@@ -407,6 +434,7 @@ function generateMealPlan() {
 
     const mealPlan = {
         userInfo: {
+            gender: state.gender,
             age: state.age,
             height: state.height,
             weight: state.weight,

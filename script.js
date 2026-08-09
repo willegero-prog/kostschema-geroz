@@ -172,8 +172,14 @@ function initializeEventListeners() {
     });
 
     // Navigation buttons
-    document.getElementById('next-btn').addEventListener('click', nextStep);
-    document.getElementById('prev-btn').addEventListener('click', prevStep);
+    // Every step renders its own Nästa/Föregående buttons that share the same
+    // id, so bind by class to all of them instead of only the first id match.
+    document.querySelectorAll('.navigation .nav-btn.primary').forEach(btn => {
+        btn.addEventListener('click', nextStep);
+    });
+    document.querySelectorAll('.navigation .nav-btn:not(.primary)').forEach(btn => {
+        btn.addEventListener('click', prevStep);
+    });
 
     // PDF download
     document.getElementById('download-pdf').addEventListener('click', downloadPDF);
@@ -318,9 +324,15 @@ function updateStepDisplay() {
         }
     });
 
-    // Update navigation buttons
-    document.getElementById('prev-btn').style.display = state.currentStep > 1 ? 'block' : 'none';
-    document.getElementById('next-btn').style.display = state.currentStep < 6 ? 'block' : 'none';
+    // Update navigation buttons for the currently visible step. Buttons share
+    // ids across steps, so scope the lookup to the active step's content.
+    const activeContent = document.querySelector('.step-content.active');
+    if (activeContent) {
+        const prevBtn = activeContent.querySelector('.nav-btn:not(.primary)');
+        const nextBtn = activeContent.querySelector('.nav-btn.primary');
+        if (prevBtn) prevBtn.style.display = state.currentStep > 1 ? 'block' : 'none';
+        if (nextBtn) nextBtn.style.display = state.currentStep < 6 ? 'block' : 'none';
+    }
 }
 
 // Day name translations
